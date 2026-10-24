@@ -15,20 +15,20 @@
 .fgrid{display:grid;gap:14px;grid-template-columns:1fr}
 @media(min-width:760px){.fgrid{grid-template-columns:1fr 1fr}}
 @media(min-width:1050px){.fgrid{grid-template-columns:repeat(3,1fr)}}
-.fc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}
+.fc{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:20px;transition:transform .3s,border-color .3s}.fc:hover{transform:translateY(-6px);border-color:rgba(0,200,255,.5)}
 .fc h3{font-size:1.15rem;margin-bottom:10px}
 .fc ul{list-style:none;padding:0;display:grid;gap:8px}
 .fc li{padding-left:24px;position:relative;font-size:.95rem;color:var(--mute)}
 .fc li::before{content:"\2713";position:absolute;left:0;color:var(--blue);font-weight:800}
 .fh{padding:44px 0 8px}.fh h2{font-size:clamp(1.5rem,5vw,2.2rem)}
 .cta2{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
-.hero .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4)}
+.hero{padding:56px 0 40px}.hero h1{max-width:14ch;font-size:clamp(2.2rem,8vw,3.8rem)}.hero p{color:#B8C2D9;margin-top:12px;max-width:50ch}
 </style>
 </head>
 <body>
 <header><div class="wrap bar"><a class="logo" href="index.html" aria-label="INSANE Store"><img src="logo.png" alt="INSANE" width="640" height="119"></a><a class="btn sm" href="index.html">Open the store</a></div></header>
 <main>
-<section class="hero"><div class="wrap">
+<section class="hero"><div class="orb o1"></div><div class="orb o2"></div><div class="wrap" style="position:relative;z-index:1">
   <h1>A full online store, <span class="grad">built for you.</span></h1>
   <p>This demo store shows what INSANE can build for your business: fast, mobile-first, and easy to manage yourself.</p>
   <div class="cta2"><a class="btn" href="index.html">Try the demo store</a><a class="btn ghost" href="https://wa.me/919034830336?text=Hi%2C%20I%20want%20a%20store%20like%20your%20demo" target="_blank" rel="noopener">Get one for my business</a></div>

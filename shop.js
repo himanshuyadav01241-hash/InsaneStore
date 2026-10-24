@@ -28,7 +28,7 @@ function toggleWish(id) { wish = wish.includes(id) ? wish.filter(x => x !== id) 
 /* Product grid */
 function card(p) {
   const s = stats(p.id), out = soldOut(p), off = p.oldPrice > p.price ? Math.round((1 - p.price / p.oldPrice) * 100) : 0, saved = wish.includes(p.id), low = lowText(p);
-  return h("article", { class: "pc" },
+  return h("article", { class: "pc", "data-id": p.id },
     h("div", { class: "pw" },
       h("button", { class: "pimg", onclick: () => openP(p.id), "aria-label": "View " + p.name }, thumb(p),
         h("span", { class: "tags" }, out ? h("span", { class: "oos" }, "Out of stock") : p.badge ? h("span", { class: "bdg" }, p.badge) : null, off && !out ? h("span", { class: "off" }, "-" + off + "%") : null)),
@@ -47,8 +47,9 @@ function render() {
   const list = products.filter(p => (!filter.cat || (filter.cat === "__saved" ? wish.includes(p.id) : p.category === filter.cat)) && (!filter.q || (p.name + " " + (p.category || "") + " " + (p.desc || "")).toLowerCase().includes(filter.q)));
   const by = { new: (a, b) => (b.createdAt || 0) - (a.createdAt || 0), low: (a, b) => a.price - b.price, high: (a, b) => b.price - a.price, rated: (a, b) => stats(b.id).avg - stats(a.id).avg || stats(b.id).c - stats(a.id).c };
   list.sort(by[filter.sort]);
-  $("#grid").replaceChildren(...(list.length ? list.map(card) : [h("p", { class: "empty" }, loaded ? (products.length ? "No products match your search." : "New products are coming soon.") : "Loading products...")]));
+  $("#grid").replaceChildren(...(list.length ? list.map(card) : (loaded ? [h("p", { class: "empty" }, products.length ? "No products match your search." : "New products are coming soon.")] : fx.skeletons())));
   $("#count").textContent = loaded && list.length ? list.length + (list.length === 1 ? " product" : " products") : "";
+  fx.after();
   cartUI();
 }
 $("#q").oninput = e => { filter.q = e.target.value.trim().toLowerCase(); render(); };
@@ -74,7 +75,7 @@ function gallery(p, arr) {
 }
 function show(id) {
   const p = products.find(x => x.id === id); if (!p) return;
-  shown = id; rv = 5; qtyN = 1; const out = soldOut(p), low = lowText(p), url = location.href.split("#")[0] + "#p-" + id;
+  shown = id; rv = 5; qtyN = 1; fx.viewed(id); const out = soldOut(p), low = lowText(p), url = location.href.split("#")[0] + "#p-" + id;
   const qv = h("span", {}, "1");
   const buy = h("div", { class: "buy" },
     out ? null : h("div", { class: "qty" }, h("button", { "aria-label": "Less", onclick: () => { qtyN = Math.max(1, qtyN - 1); qv.textContent = qtyN; } }, "−"), qv, h("button", { "aria-label": "More", onclick: () => { qtyN = Math.min(maxQ(p), qtyN + 1); qv.textContent = qtyN; } }, "+")),
@@ -132,7 +133,7 @@ function totals(it) {
 function add(id, q = 1) {
   const p = products.find(x => x.id === id); if (!p || soldOut(p)) return;
   const n = Math.min(maxQ(p), (cart[id] || 0) + q); if (n === (cart[id] || 0)) return toast("That is all we have in stock");
-  cart[id] = n; save("insane_cart", cart); cartUI(); toast("Added to cart");
+  cart[id] = n; save("insane_cart", cart); cartUI(); toast("Added to cart"); fx.fly();
 }
 function setQ(id, q) { const p = products.find(x => x.id === id); if (q <= 0) delete cart[id]; else cart[id] = Math.min(p ? maxQ(p) : 99, q); save("insane_cart", cart); cartUI(); }
 function cartUI() {
@@ -225,7 +226,7 @@ function openTrack() {
   $("#trk").hidden = false; lock(); renderTrack();
 }
 function closeTrack() { $("#trk").hidden = true; lock(); }
-$("#openTrack").onclick = openTrack; $("#closeT").onclick = closeTrack; $("#trk").onclick = e => { if (e.target.id === "trk") closeTrack(); };
+$("#openTrack").onclick = $("#heroTrack").onclick = openTrack; $("#closeT").onclick = closeTrack; $("#trk").onclick = e => { if (e.target.id === "trk") closeTrack(); };
 
 /* Live data: changes made in the admin panel show here instantly */
 function applyCfg() {

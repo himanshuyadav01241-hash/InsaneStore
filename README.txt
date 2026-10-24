@@ -64,6 +64,19 @@ PART 6. SHOW IT TO CUSTOMERS
 - For a customer project, copy this folder, change the logo and name, and use a new Firebase
   project for them (so their data stays separate).
 
+THE 3D LOOK AND ANIMATIONS (all in fx.js and shop.css)
+-----------------------------------------------------
+- Intro logo animation, then the headline rises word by word.
+- 3D rotating carousel of your products at the top: drag or swipe to spin it, tap a card to open it.
+  It uses your newest products and any with a badge, so it updates by itself.
+- Product cards tilt in 3D with a light glare when you hover (computer only).
+- Cards fade in as you scroll, loading shows shimmer placeholders, and the product photo flies
+  into the cart when you press Add to cart. Product photos zoom on hover.
+- Scrolling brand strip, scroll progress bar, back-to-top button, pulsing WhatsApp button.
+- Animations switch off automatically for people who turned on "reduce motion" on their device.
+To change colours, edit the :root and gradient colours at the top of shop.css.
+To slow the carousel, change "9" in the line "const base = () => RM ? 0 : 9;" in fx.js.
+
 TROUBLESHOOTING
 ---------------
 "Permission denied": rules not published, or you are signed in with a different Google account.
