@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store features | INSANE</title>
+<meta name="description" content="Everything a full online store can do, built by INSANE.">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="shop.css">
+<style>
+.fgrid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:760px){.fgrid{grid-template-columns:1fr 1fr}}
+@media(min-width:1050px){.fgrid{grid-template-columns:repeat(3,1fr)}}
+.fc{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}
+.fc h3{font-size:1.15rem;margin-bottom:10px}
+.fc ul{list-style:none;padding:0;display:grid;gap:8px}
+.fc li{padding-left:24px;position:relative;font-size:.95rem;color:var(--mute)}
+.fc li::before{content:"\2713";position:absolute;left:0;color:var(--blue);font-weight:800}
+.fh{padding:44px 0 8px}.fh h2{font-size:clamp(1.5rem,5vw,2.2rem)}
+.cta2{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.hero .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4)}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><a class="logo" href="index.html" aria-label="INSANE Store"><img src="logo.png" alt="INSANE" width="640" height="119"></a><a class="btn sm" href="index.html">Open the store</a></div></header>
+<main>
+<section class="hero"><div class="wrap">
+  <h1>A full online store, <span class="grad">built for you.</span></h1>
+  <p>This demo store shows what INSANE can build for your business: fast, mobile-first, and easy to manage yourself.</p>
+  <div class="cta2"><a class="btn" href="index.html">Try the demo store</a><a class="btn ghost" href="https://wa.me/919034830336?text=Hi%2C%20I%20want%20a%20store%20like%20your%20demo" target="_blank" rel="noopener">Get one for my business</a></div>
+</div></section>
+<section class="wrap fh"><h2>What your customers get</h2></section>
+<section class="wrap" style="padding:14px 0 10px"><div class="fgrid">
+  <div class="fc"><h3>Browsing</h3><ul><li>Works on phone, tablet and desktop</li><li>Search, categories and sorting</li><li>Photo gallery for every product</li><li>Discount badges and low-stock warnings</li><li>Saved items (wishlist) and share links</li></ul></div>
+  <div class="fc"><h3>Trust</h3><ul><li>Star ratings and written reviews</li><li>Reviews appear only after you approve them</li><li>Related products on every page</li><li>Product pages show up well in Google</li></ul></div>
+  <div class="fc"><h3>Buying</h3><ul><li>Cart that remembers items</li><li>Coupon codes and free-delivery goals</li><li>Order saved instantly, confirmed on WhatsApp</li><li>Live order tracking page</li><li>Can be installed like an app</li></ul></div>
+</div></section>
+<section class="wrap fh"><h2>What you control</h2></section>
+<section class="wrap" style="padding:14px 0 60px"><div class="fgrid">
+  <div class="fc"><h3>Products</h3><ul><li>Add, edit or delete in seconds</li><li>Upload photos straight from your phone</li><li>Prices, offers, badges and stock counts</li><li>Changes go live instantly</li></ul></div>
+  <div class="fc"><h3>Orders</h3><ul><li>Every order arrives live</li><li>Confirm, deliver or cancel with one tap</li><li>Stock updates by itself</li><li>Print invoices and download CSV</li></ul></div>
+  <div class="fc"><h3>Growth</h3><ul><li>Sales dashboard with a 7-day chart</li><li>Best sellers and low-stock alerts</li><li>Coupons you can pause any time</li><li>Announcement bar for offers</li></ul></div>
+</div></section>
+</main>
+<footer><div class="wrap"><img class="flogo" src="logo.png" alt="INSANE" width="640" height="119"><p class="acro">Imagine &bull; Nothing &bull; Standard &bull; Achieve &bull; New &bull; Experiences</p><div class="foot"><span>&copy; INSANE</span><a href="index.html">Back to store</a></div></div></footer>
+</body>
+</html>

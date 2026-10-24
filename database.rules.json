@@ -1,0 +1,194 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "settings": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+    },
+    "plans": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+    },
+    "projects": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+    },
+    "enquiries": {
+      ".read": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+      "$id": {
+        ".write": "!data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['name','contact','status','createdAt'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+        },
+        "biz": {
+          ".validate": "newData.isString() && newData.val().length <= 150"
+        },
+        "plan": {
+          ".validate": "newData.isString() && newData.val().length <= 60"
+        },
+        "contact": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+        },
+        "msg": {
+          ".validate": "newData.isString() && newData.val().length <= 2000"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'new' || newData.val() === 'contacted' || newData.val() === 'done')"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "shop": {
+      "settings": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+      },
+      "products": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+      },
+      "productPhotos": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+      },
+      "reviews": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'"
+      },
+      "coupons": {
+        ".read": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        "$code": {
+          ".read": true
+        }
+      },
+      "reviewsPending": {
+        ".read": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        "$pid": {
+          "$rid": {
+            ".write": "!data.exists() && newData.exists()",
+            ".validate": "newData.hasChildren(['name','rating','text','createdAt'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60"
+            },
+            "rating": {
+              ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000"
+            },
+            "createdAt": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      },
+      "orders": {
+        ".read": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        "$oid": {
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['name','phone','items','total','status','createdAt'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100"
+          },
+          "phone": {
+            ".validate": "newData.isString() && newData.val().length >= 5 && newData.val().length <= 20"
+          },
+          "address": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 500"
+          },
+          "note": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 500"
+          },
+          "coupon": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 30"
+          },
+          "subtotal": {
+            ".validate": "newData.isNumber()"
+          },
+          "discount": {
+            ".validate": "newData.isNumber()"
+          },
+          "delivery": {
+            ".validate": "newData.isNumber()"
+          },
+          "total": {
+            ".validate": "newData.isNumber()"
+          },
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'new' || newData.val() === 'confirmed' || newData.val() === 'delivered' || newData.val() === 'cancelled')"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "stockDone": {
+            ".validate": "newData.isBoolean()"
+          },
+          "items": {
+            ".validate": "newData.hasChildren()",
+            "$i": {
+              ".validate": "newData.hasChildren(['name','price','qty'])",
+              "id": {
+                ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 60"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 150"
+              },
+              "price": {
+                ".validate": "newData.isNumber()"
+              },
+              "qty": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 99"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "track": {
+        ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'himanshu.yadav01241@gmail.com'",
+        "$tid": {
+          ".read": true,
+          ".write": "!data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['status','createdAt','total'])",
+          "status": {
+            ".validate": "newData.isString() && (newData.val() === 'new' || newData.val() === 'confirmed' || newData.val() === 'delivered' || newData.val() === 'cancelled')"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "total": {
+            ".validate": "newData.isNumber()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "msg": {
+            ".validate": "newData.isString() && newData.val().length >= 0 && newData.val().length <= 200"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}

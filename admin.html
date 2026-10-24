@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Store admin | INSANE</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body class="ab">
+<div id="login" class="login" hidden>
+  <div class="box">
+    <img class="logo-img" src="logo.png" alt="INSANE">
+    <h1>Store admin</h1>
+    <p>Only the owner&rsquo;s Google account can open this panel.</p>
+    <button class="btn" id="gbtn">Sign in with Google</button>
+    <p id="loginMsg" role="status"></p>
+  </div>
+</div>
+
+<div id="app" class="shell" hidden>
+  <header class="topbar">
+    <div class="brand"><img class="logo-img" src="logo.png" alt="INSANE"><small>Store admin</small></div>
+    <div class="tb"><a href="index.html" target="_blank" rel="noopener">View store</a><button id="out">Sign out</button></div>
+  </header>
+  <nav class="menu" aria-label="Admin sections">
+    <button data-t="p-dash" aria-current="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="13" y="11" width="8" height="10" rx="1"/><rect x="3" y="14" width="8" height="7" rx="1"/></svg>Dashboard</button>
+    <button data-t="p-prod" aria-current="false"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Products</button>
+    <button data-t="p-ord" aria-current="false"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>Orders<span class="badge" id="obadge" hidden>0</span></button>
+    <button data-t="p-rev" aria-current="false"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Reviews<span class="badge" id="rbadge" hidden>0</span></button>
+    <button data-t="p-cou" aria-current="false"><svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></svg>Coupons</button>
+    <button data-t="p-set" aria-current="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Settings</button>
+  </nav>
+
+  <main class="main">
+    <section id="p-dash" class="panel">
+      <div class="ph2"><h2>Dashboard</h2><span class="hint" id="dnote"></span></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="card"><h3 class="sub0">Sales, last 7 days</h3><div id="chart"></div></div>
+      <div class="two">
+        <div class="card"><h3 class="sub0">Best sellers</h3><div id="top"></div></div>
+        <div class="card"><h3 class="sub0">Low stock</h3><div id="lowst"></div></div>
+      </div>
+      <div class="card"><h3 class="sub0">Latest orders</h3><div id="recent"></div></div>
+    </section>
+
+    <section id="p-prod" class="panel" hidden>
+      <div class="ph2"><h2>Products</h2><button class="btn sm" id="addProd">Add product</button></div>
+      <div id="editor" class="card stack" hidden>
+        <h3 id="edTitle">Add product</h3>
+        <div class="grid2">
+          <label class="f">Product name<input id="eName" maxlength="120"></label>
+          <label class="f">Category<input id="eCat" list="catlist" maxlength="40" placeholder="Fashion, Home..."></label>
+          <label class="f">Price (₹)<input id="ePrice" type="number" min="0" step="any" inputmode="decimal"></label>
+          <label class="f">Old price (optional)<input id="eOld" type="number" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <datalist id="catlist"></datalist>
+        <label class="f">Description<textarea id="eDesc" rows="4" maxlength="2000"></textarea></label>
+        <div class="grid2">
+          <label class="f">Badge (optional)<input id="eBadge" maxlength="20" placeholder="New, Bestseller..."></label>
+          <label class="f">Stock count (optional)<input id="eQty" type="number" min="0" step="1" inputmode="numeric" placeholder="Leave empty for unlimited"></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="eStock" checked> In stock</label>
+        <div>
+          <b>Photos</b> <span class="hint">up to 5, the first one is the cover</span>
+          <div class="photos" id="ePhotos"></div>
+          <label class="btn ghost sm upl">Add photos<input id="eFile" type="file" accept="image/*" multiple hidden></label>
+        </div>
+        <div class="row"><button class="btn sm" id="eSave">Save product</button><button class="btn ghost sm" id="eCancel">Cancel</button></div>
+      </div>
+      <div class="prods" id="prodList"></div>
+    </section>
+
+    <section id="p-ord" class="panel" hidden>
+      <div class="ph2"><h2>Orders</h2><button class="btn ghost sm" id="csv">Download CSV</button></div>
+      <div class="stats" id="ostats"></div>
+      <div id="ordList"></div>
+    </section>
+
+    <section id="p-rev" class="panel" hidden>
+      <div class="ph2"><h2>Reviews</h2></div>
+      <p class="hint">New reviews wait here until you approve them, so nothing appears on your store without your say.</p>
+      <h3 class="sub">Waiting for approval</h3><div id="pendList"></div>
+      <h3 class="sub">Published</h3><div id="pubList"></div>
+    </section>
+
+    <section id="p-cou" class="panel" hidden>
+      <div class="ph2"><h2>Coupons</h2></div>
+      <div class="card stack">
+        <h3>New coupon</h3>
+        <div class="grid2">
+          <label class="f">Code (letters and numbers)<input id="cCode" maxlength="20" placeholder="WELCOME10"></label>
+          <label class="f">Type<select id="cType"><option value="percent">Percent off</option><option value="flat">Flat amount off</option></select></label>
+          <label class="f">Value<input id="cVal" type="number" min="1" step="any" inputmode="decimal"></label>
+          <label class="f">Minimum order (₹)<input id="cMin" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label>
+        </div>
+        <div class="row"><button class="btn sm" id="cSave">Save coupon</button></div>
+      </div>
+      <div id="couList" class="prods"></div>
+    </section>
+
+    <section id="p-set" class="panel" hidden>
+      <div class="ph2"><h2>Settings</h2></div>
+      <div class="card">
+        <div class="grid2">
+          <label class="f">Store name<input id="sName"></label>
+          <label class="f">WhatsApp number with country code<input id="sWa" inputmode="numeric" placeholder="919034830336"></label>
+          <label class="f">Contact email<input id="sMail" type="email"></label>
+          <label class="f">Announcement bar (empty hides it)<input id="sAnn" maxlength="120"></label>
+          <label class="f">Delivery fee (₹)<input id="sFee" type="number" min="0" step="any" inputmode="decimal"></label>
+          <label class="f">Free delivery above (₹, 0 = never)<input id="sFree" type="number" min="0" step="any" inputmode="decimal"></label>
+        </div>
+        <div class="row"><button class="btn sm" id="saveSet">Save settings</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+<p id="toast" role="status" hidden></p>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="common.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
