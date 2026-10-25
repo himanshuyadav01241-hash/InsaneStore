@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>INSANE Store | Imagine Beyond Standard. Create Extraordinary.</title>
 <meta name="description" content="Shop products from INSANE. Photos, reviews and easy ordering on WhatsApp.">
 <meta property="og:title" content="INSANE Store">
@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem("insane_theme");if(t)document.documentElement.dataset.theme=t;if(sessionStorage.getItem("insane_s"))document.documentElement.classList.add("ns");else sessionStorage.setItem("insane_s","1")}catch(e){}</script>
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="shop.css">
 </head>
@@ -25,7 +26,8 @@
 <header>
   <div class="wrap bar">
     <a class="logo" href="./" aria-label="INSANE Store home"><img src="logo.png" alt="INSANE" width="640" height="119"></a>
-    <div class="hbtns"><button class="cartbtn" id="openTrack" aria-label="Track your orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></button>
+    <div class="hbtns"><button class="cartbtn vb" id="visitBtn" aria-label="Find our store" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
+    <button class="cartbtn" id="openTrack" aria-label="Track your orders"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></button>
     <button class="cartbtn" id="openCart" aria-label="Open cart">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>
       <span class="cn" id="cn" hidden>0</span>
@@ -74,17 +76,32 @@
     <h2 class="sh">Recently <span class="grad">viewed</span></h2>
     <div class="rel" id="recent"></div>
   </section>
+  <section class="wrap loc" id="visit" hidden>
+    <h2 class="sh">Visit our <span class="grad">store</span></h2>
+    <div class="lg">
+      <div class="lc">
+        <span class="opnow" id="openNow" hidden></span>
+        <div class="lrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><div><b>Address</b><p id="lAddr"></p></div></div>
+        <div class="lrow" id="lHoursRow" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><b>Opening hours</b><p id="lHours"></p></div></div>
+        <div class="lrow" id="lPhoneRow" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg><div><b>Call us</b><p><a id="lPhone"></a></p></div></div>
+        <div class="lbtns"><a class="btn" id="lDir" target="_blank" rel="noopener">Get directions</a><button class="btn ghost" id="lDist" type="button" hidden>How far am I?</button></div>
+        <p class="msg" id="lMsg" role="status"></p>
+      </div>
+      <div class="map"><iframe id="lMap" title="Map showing our store" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
     <img class="flogo" src="logo.png" alt="INSANE" width="640" height="119">
+    <p class="faddr" id="fAddr"></p>
     <p class="acro">Imagine &bull; Nothing &bull; Standard &bull; Achieve &bull; New &bull; Experiences</p>
     <div class="foot"><span>&copy; <span id="year"></span> INSANE. All rights reserved.</span><span><a href="features.html">Store features</a> &nbsp; <a href="admin.html">Admin</a></span></div>
   </div>
 </footer>
 
-<div class="ov" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-label="Product details"><button class="x" id="closeM" aria-label="Close">&times;</button><div id="mbody"></div></div></div>
+<div class="ov" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-label="Product details"><button class="x" id="closeM" aria-label="Close">&times;</button><div id="mbody"></div><div class="mbuy" id="mbuy"></div></div></div>
 
 <div class="ov" id="trk" hidden><div class="sheet" role="dialog" aria-modal="true" aria-label="Track your order"><button class="x" id="closeT" aria-label="Close">&times;</button><div id="tbody"></div></div></div>
 
@@ -94,6 +111,12 @@
   <div class="dbody" id="dbody"></div>
 </aside>
 
+<nav class="tabbar" aria-label="Quick navigation">
+  <button id="tbHome"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</button>
+  <button id="tbSaved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 10c0 5.800-8 11-8 11z"/></svg>Saved</button>
+  <button id="tbTrack"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Orders</button>
+  <button id="tbCart"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11h10.2L20 7H6.2"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>Cart<span class="cn" id="cn2" hidden>0</span></button>
+</nav>
 <button class="totop" id="toTop" aria-label="Back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 <a class="wa-float" data-wa target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></a>
 <p id="toast" role="status" hidden></p>

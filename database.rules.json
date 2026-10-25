@@ -160,6 +160,9 @@
           },
           "$other": {
             ".validate": false
+          },
+          "method": {
+            ".validate": "newData.isString() && (newData.val() === 'delivery' || newData.val() === 'pickup')"
           }
         }
       },

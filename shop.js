@@ -1,7 +1,8 @@
 const CFG = { ...DEFAULTS.settings };
 const BASE_TITLE = document.title;
 let products = [], reviews = {}, loaded = false, shown = null, done = null, rv = 5, qtyN = 1, coupon = null, cmsg = "";
-const filter = { q: "", cat: "", sort: "new" };
+const filter = { q: "", cat: "", sort: "new", stock: false };
+let method = "delivery";
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 let cart = load("insane_cart", {}), wish = load("insane_wish", []), mine = load("insane_orders", []);
@@ -10,7 +11,7 @@ const saveCo = () => save("insane_co", { name: co.name, phone: co.phone, address
 const hue = s => [...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
 const phStyle = n => `background:linear-gradient(135deg,hsl(${hue(n)} 70% 62%),hsl(${(hue(n) + 50) % 360} 70% 50%))`;
 const ph = p => h("div", { class: "ph", style: phStyle(p.name) }, String(p.name).charAt(0).toUpperCase());
-const thumb = p => safeImg(p.thumb) ? h("img", { src: safeImg(p.thumb), alt: p.name, loading: "lazy" }) : ph(p);
+const thumb = p => safeImg(p.thumb) ? h("img", { src: safeImg(p.thumb), alt: p.name, loading: "lazy", decoding: "async" }) : ph(p);
 const stats = id => { const r = Object.values(reviews[id] || {}); const c = r.length; return { c, avg: c ? r.reduce((a, x) => a + (+x.rating || 0), 0) / c : 0 }; };
 const hasStock = p => typeof p.stock === "number";
 const soldOut = p => p.inStock === false || (hasStock(p) && p.stock <= 0);
@@ -43,8 +44,8 @@ function card(p) {
 function render() {
   const cats = [...new Set(products.map(p => p.category).filter(Boolean))], saved = products.filter(p => wish.includes(p.id)).length;
   const chip = (k, l) => h("button", { class: "chip" + (filter.cat === k ? " on" : ""), onclick: () => { filter.cat = k; render(); } }, l);
-  $("#cats").replaceChildren(...[chip("", "All"), saved ? chip("__saved", "♥ Saved (" + saved + ")") : null, ...cats.map(c => chip(c, c))].filter(Boolean));
-  const list = products.filter(p => (!filter.cat || (filter.cat === "__saved" ? wish.includes(p.id) : p.category === filter.cat)) && (!filter.q || (p.name + " " + (p.category || "") + " " + (p.desc || "")).toLowerCase().includes(filter.q)));
+  $("#cats").replaceChildren(...[chip("", "All"), saved ? chip("__saved", "♥ Saved (" + saved + ")") : null, ...cats.map(c => chip(c, c)), h("button", { class: "chip" + (filter.stock ? " on" : ""), onclick: () => { filter.stock = !filter.stock; render(); } }, "In stock only")].filter(Boolean));
+  const list = products.filter(p => (!filter.stock || !soldOut(p)) && (!filter.cat || (filter.cat === "__saved" ? wish.includes(p.id) : p.category === filter.cat)) && (!filter.q || (p.name + " " + (p.category || "") + " " + (p.desc || "")).toLowerCase().includes(filter.q)));
   const by = { new: (a, b) => (b.createdAt || 0) - (a.createdAt || 0), low: (a, b) => a.price - b.price, high: (a, b) => b.price - a.price, rated: (a, b) => stats(b.id).avg - stats(a.id).avg || stats(b.id).c - stats(a.id).c };
   list.sort(by[filter.sort]);
   $("#grid").replaceChildren(...(list.length ? list.map(card) : (loaded ? [h("p", { class: "empty" }, products.length ? "No products match your search." : "New products are coming soon.")] : fx.skeletons())));
@@ -77,16 +78,17 @@ function show(id) {
   const p = products.find(x => x.id === id); if (!p) return;
   shown = id; rv = 5; qtyN = 1; fx.viewed(id); const out = soldOut(p), low = lowText(p), url = location.href.split("#")[0] + "#p-" + id;
   const qv = h("span", {}, "1");
-  const buy = h("div", { class: "buy" },
+  $("#mbuy").replaceChildren(h("span", { class: "pp" }, money(p.price)),
     out ? null : h("div", { class: "qty" }, h("button", { "aria-label": "Less", onclick: () => { qtyN = Math.max(1, qtyN - 1); qv.textContent = qtyN; } }, "−"), qv, h("button", { "aria-label": "More", onclick: () => { qtyN = Math.min(maxQ(p), qtyN + 1); qv.textContent = qtyN; } }, "+")),
     h("button", { class: "btn", disabled: out, onclick: () => add(id, qtyN) }, out ? "Out of stock" : "Add to cart"),
-    h("a", { class: "btn ghost", target: "_blank", rel: "noopener", href: waLink("Hi, I have a question about " + p.name) }, "Ask on WhatsApp"));
+    out ? null : h("button", { class: "btn ghost", onclick: () => { add(id, qtyN); if (cart[id]) { closeP(); openCart(); } } }, "Buy now"));
+  const askB = h("a", { class: "btn ghost sm", target: "_blank", rel: "noopener", href: waLink("Hi, I have a question about " + p.name) }, "Ask on WhatsApp");
   const heart = h("button", { class: "btn ghost sm", onclick: () => { toggleWish(id); heart.textContent = wish.includes(id) ? "♥ Saved" : "♡ Save"; } }, wish.includes(id) ? "♥ Saved" : "♡ Save");
   const shareB = h("button", { class: "btn ghost sm", onclick: async () => { try { if (navigator.share) await navigator.share({ title: p.name, url }); else { await navigator.clipboard.writeText(url); toast("Link copied"); } } catch (e) {} } }, "Share");
   const info = h("div", { class: "info" }, h("div", { class: "tagrow" }, p.category ? h("span", { class: "cat" }, p.category) : null, p.badge ? h("span", { class: "cat hot" }, p.badge) : null), h("h2", {}, p.name), h("div", { class: "rt", id: "srt" }),
     h("div", { class: "big" }, money(p.price), p.oldPrice > p.price ? h("s", {}, money(p.oldPrice)) : null),
     h("div", { class: "stock " + (out ? "out" : "in") }, out ? "Out of stock" : low || "In stock"),
-    p.desc ? h("p", { class: "desc" }, p.desc) : null, buy, h("div", { class: "row2" }, heart, shareB));
+    p.desc ? h("p", { class: "desc" }, p.desc) : null, h("div", { class: "row2" }, heart, shareB, askB));
   const rel = products.filter(x => x.id !== id && p.category && x.category === p.category).slice(0, 6);
   $("#mbody").replaceChildren(...[h("div", { class: "pd" }, h("div", { class: "gal", id: "gal" }), info), reviewSection(id),
     rel.length ? h("div", { class: "revs" }, h("h3", {}, "You may also like"), h("div", { class: "rel" }, rel.map(card))) : null].filter(Boolean));
@@ -123,11 +125,14 @@ function reviewSection(id) {
 }
 
 /* Cart, coupons and checkout */
+const hasLoc = () => !!(CFG.addr || (CFG.lat && CFG.lng));
+const canPickup = () => !!CFG.pickup && hasLoc();
+const mth = () => canPickup() && method === "pickup" ? "pickup" : "delivery";
 const items = () => Object.entries(cart).map(([id, q]) => ({ p: products.find(x => x.id === id), q })).filter(x => x.p);
 function totals(it) {
   const sub = it.reduce((a, x) => a + x.p.price * x.q, 0);
   let disc = 0; if (coupon && sub >= (coupon.min || 0)) disc = coupon.type === "percent" ? Math.round(sub * Math.min(100, coupon.value) / 100) : Math.min(coupon.value, sub);
-  const after = sub - disc, fee = (+CFG.freeAbove > 0 && after >= +CFG.freeAbove) || !it.length ? 0 : (+CFG.deliveryFee || 0);
+  const after = sub - disc, fee = mth() === "pickup" ? 0 : (+CFG.freeAbove > 0 && after >= +CFG.freeAbove) || !it.length ? 0 : (+CFG.deliveryFee || 0);
   return { sub, disc, after, fee, total: after + fee };
 }
 function add(id, q = 1) {
@@ -138,7 +143,7 @@ function add(id, q = 1) {
 function setQ(id, q) { const p = products.find(x => x.id === id); if (q <= 0) delete cart[id]; else cart[id] = Math.min(p ? maxQ(p) : 99, q); save("insane_cart", cart); cartUI(); }
 function cartUI() {
   const n = items().reduce((a, x) => a + x.q, 0);
-  $("#cn").textContent = n; $("#cn").hidden = !n;
+  $("#cn").textContent = n; $("#cn").hidden = !n; $("#cn2").textContent = n; $("#cn2").hidden = !n;
   if (loaded) renderCart();
 }
 function openCart() { $("#drawer").classList.add("open"); $("#ov2").hidden = false; lock(); }
@@ -170,8 +175,10 @@ function renderCart() {
   const cin = h("input", { placeholder: "Coupon code", maxlength: 20, "aria-label": "Coupon code" }); cin.value = coupon ? coupon.code : "";
   const cbox = h("div", { class: "cpn" }, h("div", { class: "crow" }, cin, h("button", { class: "btn ghost sm", type: "button", onclick: () => applyCoupon(cin.value) }, coupon ? "Change" : "Apply")), cmsg ? h("p", { class: "msg" }, cmsg) : null);
   const btn = h("button", { class: "btn", type: "submit" }, "Place order");
+  const pick = mth() === "pickup";
+  const mt = canPickup() ? h("div", { class: "mth", role: "group", "aria-label": "Delivery method" }, ["delivery", "pickup"].map(k => h("button", { type: "button", class: "chip" + (mth() === k ? " on" : ""), onclick: () => { method = k; renderCart(); } }, k === "delivery" ? "Delivery" : "Store pickup"))) : null;
   const form = h("form", { class: "co" }, field("Your name", "name", { required: true, maxlength: 100, autocomplete: "name" }), field("Phone number", "phone", { required: true, maxlength: 20, type: "tel", autocomplete: "tel", inputmode: "tel" }),
-    field("Delivery address", "address", { required: true, rows: 3, maxlength: 500 }), field("Note (optional)", "note", { rows: 2, maxlength: 500 }), btn,
+    pick ? h("div", { class: "pinfo" }, "Pick up from:\n" + (CFG.addr || "our store")) : field("Delivery address", "address", { required: true, rows: 3, maxlength: 500 }), field("Note (optional)", "note", { rows: 2, maxlength: 500 }), btn,
     h("p", { class: "msg" }, "Your order is saved and sent to me. I confirm it with you on WhatsApp."));
   form.onsubmit = async e => { e.preventDefault(); btn.disabled = true; btn.textContent = "Placing order..."; await place(it, t); };
   const need = +CFG.freeAbove > 0 && t.fee > 0 ? +CFG.freeAbove - t.after : 0;
@@ -179,15 +186,15 @@ function renderCart() {
     h("div", {}, h("h4", {}, p.name), h("small", {}, money(p.price)),
       h("div", { class: "qty" }, h("button", { "aria-label": "Less", onclick: () => setQ(p.id, q - 1) }, "−"), h("span", {}, String(q)), h("button", { "aria-label": "More", onclick: () => setQ(p.id, q + 1) }, "+"))),
     h("div", { class: "lt" }, money(p.price * q), h("br"), h("button", { class: "rm", onclick: () => setQ(p.id, 0) }, "Remove")))),
-    need > 0 ? h("p", { class: "free" }, "Add " + money(need) + " more for free delivery") : null, cbox,
-    h("div", { class: "sum" }, line("Subtotal", money(t.sub)), t.disc ? line("Discount (" + coupon.code + ")", "-" + money(t.disc), "disc") : null, line("Delivery", t.fee ? money(t.fee) : "Free"),
+    need > 0 ? h("p", { class: "free" }, "Add " + money(need) + " more for free delivery") : null, cbox, mt,
+    h("div", { class: "sum" }, line("Subtotal", money(t.sub)), t.disc ? line("Discount (" + coupon.code + ")", "-" + money(t.disc), "disc") : null, line(pick ? "Pickup" : "Delivery", t.fee ? money(t.fee) : "Free"),
       h("div", { class: "total" }, h("span", {}, "Total"), h("span", {}, money(t.total)))), form].filter(Boolean));
 }
 async function place(it, t) {
-  const order = { name: co.name.trim(), phone: co.phone.trim(), address: co.address.trim(), note: co.note.trim(), subtotal: t.sub, discount: t.disc, delivery: t.fee, total: t.total, status: "new", createdAt: TS(),
+  const pk = mth() === "pickup", order = { name: co.name.trim(), phone: co.phone.trim(), method: pk ? "pickup" : "delivery", address: pk ? "" : co.address.trim(), note: co.note.trim(), subtotal: t.sub, discount: t.disc, delivery: t.fee, total: t.total, status: "new", createdAt: TS(),
     items: it.map(x => ({ id: x.p.id, name: x.p.name, price: Number(x.p.price), qty: x.q })) };
   if (coupon && t.disc) order.coupon = coupon.code;
-  const text = `New order from ${order.name} (${order.phone})\n` + it.map((x, i) => `${i + 1}. ${x.p.name} x${x.q} = ${money(x.p.price * x.q)}`).join("\n") + (t.disc ? `\nDiscount: -${money(t.disc)}` : "") + `\nDelivery: ${t.fee ? money(t.fee) : "Free"}\nTotal: ${money(t.total)}\nAddress: ${order.address}` + (order.note ? `\nNote: ${order.note}` : "");
+  const text = `New order from ${order.name} (${order.phone})\n` + it.map((x, i) => `${i + 1}. ${x.p.name} x${x.q} = ${money(x.p.price * x.q)}`).join("\n") + (t.disc ? `\nDiscount: -${money(t.disc)}` : "") + `\n${pk ? "Pickup" : "Delivery"}: ${t.fee ? money(t.fee) : "Free"}\nTotal: ${money(t.total)}\n${pk ? "Store pickup: " + (CFG.addr || "") : "Address: " + order.address}` + (order.note ? `\nNote: ${order.note}` : "");
   let saved = true, id = "";
   try {
     if (!fb) throw new Error("offline");
@@ -232,7 +239,41 @@ $("#openTrack").onclick = $("#heroTrack").onclick = openTrack; $("#closeT").oncl
 function applyCfg() {
   $$("[data-wa]").forEach(a => a.href = waLink());
   const an = $("#ann"); an.textContent = CFG.announce || ""; an.hidden = !CFG.announce;
+  const th = CFG.theme || "sunset"; document.documentElement.dataset.theme = th; try { localStorage.setItem("insane_theme", th); } catch (e) {}
+  renderLoc();
 }
+function openBadge() {
+  const b = $("#openNow"); if (!CFG.openAt || !CFG.closeAt) { b.hidden = true; return; }
+  const m = x => { const [a, c] = x.split(":").map(Number); return a * 60 + c; }, n = new Date(), cur = n.getHours() * 60 + n.getMinutes(), o = m(CFG.openAt), c = m(CFG.closeAt);
+  const open = o <= c ? cur >= o && cur < c : cur >= o || cur < c;
+  const fmt = x => { let [a, c] = x.split(":").map(Number); const ap = a >= 12 ? "PM" : "AM"; a = a % 12 || 12; return a + ":" + String(c).padStart(2, "0") + " " + ap; };
+  b.hidden = false; b.classList.toggle("cl", !open); b.textContent = open ? "Open now, closes " + fmt(CFG.closeAt) : "Closed now, opens " + fmt(CFG.openAt);
+}
+function renderLoc() {
+  const on = hasLoc(); $("#visit").hidden = !on; $("#visitBtn").hidden = !on; $("#fAddr").textContent = on ? CFG.addr || "" : "";
+  if (!on) return;
+  const q = CFG.lat && CFG.lng ? CFG.lat + "," + CFG.lng : CFG.addr;
+  $("#lAddr").textContent = CFG.addr || "See the map"; $("#lHours").textContent = CFG.hours || ""; $("#lHoursRow").hidden = !CFG.hours;
+  const ph = String(CFG.phone || "").replace(/[^\d+]/g, ""), pa = $("#lPhone"); $("#lPhoneRow").hidden = !ph; pa.textContent = CFG.phone || ""; pa.href = ph ? "tel:" + ph : "#";
+  $("#lDir").href = CFG.mapLink && /^https?:\/\//.test(CFG.mapLink) ? CFG.mapLink : "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(q);
+  const f = $("#lMap"); if (f.dataset.q !== q) { f.dataset.q = q; f.src = "https://www.google.com/maps?q=" + encodeURIComponent(q) + "&output=embed"; }
+  $("#lDist").hidden = !(CFG.lat && CFG.lng); openBadge();
+}
+$("#lDist").onclick = () => {
+  const msg = $("#lMsg"); if (!navigator.geolocation) { msg.textContent = "Your browser cannot share your location."; return; }
+  msg.textContent = "Finding you...";
+  navigator.geolocation.getCurrentPosition(p => {
+    const rad = x => x * Math.PI / 180, dLa = rad(CFG.lat - p.coords.latitude), dLo = rad(CFG.lng - p.coords.longitude);
+    const a = Math.sin(dLa / 2) ** 2 + Math.cos(rad(p.coords.latitude)) * Math.cos(rad(CFG.lat)) * Math.sin(dLo / 2) ** 2, km = 12742 * Math.asin(Math.sqrt(a));
+    msg.textContent = "You are about " + (km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1) + " km") + " from our store (straight line).";
+  }, () => { msg.textContent = "Location permission was not given."; }, { timeout: 8000 });
+};
+$("#visitBtn").onclick = () => $("#visit").scrollIntoView({ behavior: "smooth" });
+setInterval(() => { if (hasLoc()) openBadge(); }, 60000);
+/* Phone bottom bar */
+$("#tbHome").onclick = () => scrollTo({ top: 0, behavior: "smooth" });
+$("#tbSaved").onclick = () => { if (!wish.length) return toast("Tap the heart on a product to save it"); filter.cat = "__saved"; render(); $("#shop").scrollIntoView({ behavior: "smooth" }); };
+$("#tbTrack").onclick = openTrack; $("#tbCart").onclick = openCart;
 if (!fb) { products = DEFAULTS.products.map((p, i) => ({ id: "s" + i, createdAt: Date.now() - i, ...p })); loaded = true; applyCfg(); render(); }
 else {
   applyCfg(); render();

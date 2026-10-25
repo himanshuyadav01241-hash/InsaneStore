@@ -137,3 +137,9 @@ label.f{display:grid;gap:6px;font-weight:700;font-size:.92rem}
 .lr:last-child{border:0}
 .bar2{height:8px;border-radius:99px;background:var(--grad);margin-top:4px}
 .tiny{color:var(--mute);font-size:.85rem}
+
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.th{display:flex;align-items:center;gap:10px;font:700 .95rem Figtree,sans-serif;padding:10px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer;min-height:48px}
+.th.on{border-color:var(--ink);box-shadow:0 0 0 3px rgba(5,7,13,.12)}
+.sw3{width:28px;height:28px;border-radius:50%;flex:none}
+@media(max-width:480px){.card .grid2,.grid2{grid-template-columns:1fr!important}.card .grid2 label:first-child{grid-column:auto}.main input,.main select,.main textarea{min-height:46px}}

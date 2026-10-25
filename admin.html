@@ -105,8 +105,9 @@
     </section>
 
     <section id="p-set" class="panel" hidden>
-      <div class="ph2"><h2>Settings</h2></div>
-      <div class="card">
+      <div class="ph2"><h2>Settings</h2><button class="btn sm" id="saveSet">Save all settings</button></div>
+      <div class="card stack">
+        <h3>Store details</h3>
         <div class="grid2">
           <label class="f">Store name<input id="sName"></label>
           <label class="f">WhatsApp number with country code<input id="sWa" inputmode="numeric" placeholder="919034830336"></label>
@@ -115,7 +116,26 @@
           <label class="f">Delivery fee (₹)<input id="sFee" type="number" min="0" step="any" inputmode="decimal"></label>
           <label class="f">Free delivery above (₹, 0 = never)<input id="sFree" type="number" min="0" step="any" inputmode="decimal"></label>
         </div>
-        <div class="row"><button class="btn sm" id="saveSet">Save settings</button></div>
+      </div>
+      <div class="card stack">
+        <h3>Colour theme</h3>
+        <p class="hint">Pick the look of your store. It changes for every customer as soon as you save.</p>
+        <div class="themes" id="themes"></div>
+      </div>
+      <div class="card stack">
+        <h3>Store location</h3>
+        <p class="hint">Adds a "Visit our store" section with a map, directions and opening hours. Leave the address empty to hide it.</p>
+        <label class="f">Address<textarea id="sAddr" rows="3" maxlength="300" placeholder="Shop 12, Main Market, Gurugram, Haryana"></textarea></label>
+        <div class="row"><button class="btn ghost sm" id="useLoc" type="button">Use my current location for the map pin</button><button class="btn ghost sm" id="clrLoc" type="button" hidden>Clear pin</button></div>
+        <p class="tiny" id="locNote"></p>
+        <div class="grid2">
+          <label class="f">Store phone<input id="sPhone" type="tel" inputmode="tel"></label>
+          <label class="f">Google Maps link (optional)<input id="sMap" type="url" placeholder="https://maps.app.goo.gl/..."></label>
+          <label class="f">Opens at<input id="sOpen" type="time"></label>
+          <label class="f">Closes at<input id="sClose" type="time"></label>
+        </div>
+        <label class="f">Opening hours shown to customers<textarea id="sHours" rows="3" maxlength="300" placeholder="Mon to Sat: 10 AM to 9 PM&#10;Sunday: closed"></textarea></label>
+        <label class="chk"><input type="checkbox" id="sPickup"> Offer store pickup at checkout (no delivery fee)</label>
       </div>
     </section>
   </main>

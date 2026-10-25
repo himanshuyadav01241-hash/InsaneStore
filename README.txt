@@ -42,6 +42,19 @@ PART 4. FIRST RUN
    your settings. A message appears at the bottom.
 3. Dashboard tab shows your numbers. Products tab: edit the samples or delete them and add your own.
 
+PART 4B. COLOUR THEME AND STORE LOCATION (new)
+----------------------------------------------
+Admin > Settings:
+- Colour theme: tap Sunset, Neon, Emerald, Gold or Ocean, then "Save all settings". Every customer
+  sees the new colours straight away.
+- Store location: type your shop address. For an exact map pin, stand at your shop on your phone,
+  open the admin panel, press "Use my current location for the map pin" and allow location.
+  Add your phone, opening hours text, and optional Opens at / Closes at times (these power the
+  green "Open now" badge). Tick "Offer store pickup" to let customers collect from your shop.
+- Press "Save all settings". The store now shows a "Visit our store" section with a map,
+  Get directions, a call link and a "How far am I?" button, plus a pin button in the header.
+- IMPORTANT: republish database.rules.json (it changed again: orders now record delivery or pickup).
+
 PART 5. TEST EVERYTHING (this is your practice run)
 ---------------------------------------------------
 [ ] Products > Add product: name, price, old price, badge, stock count, 2 photos > Save.
@@ -53,6 +66,9 @@ PART 5. TEST EVERYTHING (this is your practice run)
 [ ] Back on the store press the box icon (top right): your order shows its progress.
 [ ] Orders > Print invoice. Dashboard: the chart and best sellers update.
 [ ] Settings: change the announcement text and delivery fee: the store updates instantly.
+[ ] Settings: pick a theme, add your address and tick pickup. Open the store: map section appears,
+    and the cart offers Delivery or Store pickup.
+[ ] Keep admin open on your computer, place an order from your phone: you hear a beep and see an alert.
 [ ] On your phone open the store in Chrome > menu > "Add to Home screen" to install it.
 
 PART 6. SHOW IT TO CUSTOMERS
@@ -63,6 +79,12 @@ PART 6. SHOW IT TO CUSTOMERS
   on the store, is the strongest demo.
 - For a customer project, copy this folder, change the logo and name, and use a new Firebase
   project for them (so their data stays separate).
+
+PHONE APP-STYLE LAYOUT
+----------------------
+On phones the store has a bottom bar (Home, Saved, Orders, Cart), a sticky Add to cart / Buy now bar on
+product pages, large tap targets, and it respects the notch and home bar. Return visitors skip the intro
+animation. It can be installed to the home screen from the browser menu.
 
 THE 3D LOOK AND ANIMATIONS (all in fx.js and shop.css)
 -----------------------------------------------------

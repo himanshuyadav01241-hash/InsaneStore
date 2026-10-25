@@ -43,7 +43,7 @@ async function start() {
   } catch (e) { toast(errText(e)); }
   const err = e => toast(errText(e));
   ref("products").on("value", s => { products = toList(s.val()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); renderProducts(); renderRev(); renderDash(); }, err);
-  ref("orders").on("value", s => { orders = toList(s.val()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); renderOrders(); renderDash(); }, err);
+  ref("orders").on("value", s => { orders = toList(s.val()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); notifyNew(); renderOrders(); renderDash(); }, err);
   ref("coupons").on("value", s => { coupons = Object.entries(s.val() || {}).map(([code, v]) => ({ code, ...v })); renderCoupons(); }, err);
   ref("reviews").on("value", s => { reviews = s.val() || {}; renderRev(); }, err);
   ref("reviewsPending").on("value", s => { pending = s.val() || {}; renderRev(); renderDash(); }, err);
@@ -69,6 +69,7 @@ function renderProducts() {
     h("div", {}, h("h3", {}, p.name), h("div", { class: "meta" }, money(p.price) + (p.oldPrice > p.price ? " (was " + money(p.oldPrice) + ")" : "")), h("div", { class: "meta" }, (p.category || "No category") + " | " + (p.inStock === false || (typeof p.stock === "number" && p.stock <= 0) ? "Out of stock" : "In stock") + (typeof p.stock === "number" ? " | " + p.stock + " left" : "") + (p.badge ? " | " + p.badge : ""))),
     h("div", { class: "row" },
       h("button", { class: "btn sm", onclick: () => openEditor(p) }, "Edit"),
+      h("button", { class: "btn ghost sm", onclick: () => openEditor(p, true) }, "Duplicate"),
       h("button", { class: "btn ghost sm", onclick: guard(() => ref("products/" + p.id + "/inStock").set(p.inStock === false)) }, p.inStock === false ? "Mark in stock" : "Mark out of stock"),
       h("button", { class: "btn ghost sm danger", onclick: guard(async () => {
         if (!confirm("Delete " + p.name + " with its photos and reviews?")) return;
@@ -80,14 +81,14 @@ function renderPhotos() {
   $("#ePhotos").replaceChildren(...ed.photos.map((s, i) => h("div", { class: "ph1" }, h("img", { src: s, alt: "Photo " + (i + 1) }), i ? null : h("i", {}, "Cover"),
     h("button", { "aria-label": "Remove photo", onclick: () => { ed.photos.splice(i, 1); renderPhotos(); } }, "×"))));
 }
-function openEditor(p) {
-  ed = { id: p ? p.id : null, photos: [], created: p ? p.createdAt : 0 };
-  $("#edTitle").textContent = p ? "Edit product" : "Add product";
-  $("#eName").value = p ? p.name : ""; $("#eCat").value = p ? p.category || "" : ""; $("#ePrice").value = p ? p.price : "";
+function openEditor(p, copy) {
+  ed = { id: p && !copy ? p.id : null, src: p ? p.id : null, photos: [], created: p && !copy ? p.createdAt : 0 };
+  $("#edTitle").textContent = copy ? "Duplicate product" : p ? "Edit product" : "Add product";
+  $("#eName").value = p ? p.name + (copy ? " (copy)" : "") : ""; $("#eCat").value = p ? p.category || "" : ""; $("#ePrice").value = p ? p.price : "";
   $("#eOld").value = p && p.oldPrice ? p.oldPrice : ""; $("#eDesc").value = p ? p.desc || "" : ""; $("#eStock").checked = p ? p.inStock !== false : true;
   $("#eBadge").value = p ? p.badge || "" : ""; $("#eQty").value = p && typeof p.stock === "number" ? p.stock : "";
   renderPhotos(); $("#editor").hidden = false; $("#editor").scrollIntoView({ behavior: "smooth", block: "start" });
-  if (p) ref("productPhotos/" + p.id).once("value").then(s => { if (ed.id === p.id) { ed.photos = Object.values(s.val() || {}).map(safeImg).filter(Boolean); renderPhotos(); } }).catch(e => toast(errText(e)));
+  if (p) ref("productPhotos/" + p.id).once("value").then(s => { if (ed.src === p.id) { ed.photos = Object.values(s.val() || {}).map(safeImg).filter(Boolean); renderPhotos(); } }).catch(e => toast(errText(e)));
 }
 $("#addProd").onclick = () => openEditor(null);
 $("#eCancel").onclick = () => $("#editor").hidden = true;
@@ -114,11 +115,17 @@ $("#eSave").onclick = guard(async () => {
 }, 40000);
 
 /* Orders */
+let known = null;
+function beep() { try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.setValueAtTime(.15, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + .6); o.start(); o.stop(a.currentTime + .6); } catch (e) {} }
+function notifyNew() {
+  if (known) { const fresh = orders.filter(o => !known.has(o.id) && (o.status || "new") === "new"); if (fresh.length) { toast("New order from " + fresh[0].name + " (" + money(fresh[0].total) + ")"); beep(); } }
+  known = new Set(orders.map(o => o.id));
+}
 function renderOrders() {
   const n = k => orders.filter(o => (o.status || "new") === k).length;
   $("#ostats").replaceChildren(...[["", "All", orders.length], ["new", "New", n("new")], ["confirmed", "Confirmed", n("confirmed")], ["delivered", "Delivered", n("delivered")]]
     .map(([k, l, c]) => h("button", { class: "stat" + (ofilter === k ? " on" : ""), onclick: () => { ofilter = k; renderOrders(); } }, h("b", {}, String(c)), h("span", {}, l))));
-  $("#obadge").textContent = n("new"); $("#obadge").hidden = !n("new");
+  $("#obadge").textContent = n("new"); $("#obadge").hidden = !n("new"); document.title = (n("new") ? "(" + n("new") + ") " : "") + "Store admin | INSANE";
   const list = orders.filter(o => !ofilter || (o.status || "new") === ofilter);
   $("#ordList").replaceChildren(...(list.length ? list.map(orderCard) : [h("p", { class: "empty card" }, "No orders here yet. New orders appear the moment a customer places one.")]));
 }
@@ -130,7 +137,7 @@ function orderCard(o) {
   return h("article", { class: "card enq " + (o.status || "new") },
     h("div", { class: "e-top" }, h("span", { class: "av" }, (o.name || "?").trim().charAt(0).toUpperCase()),
       h("div", { class: "e-who" }, h("h3", {}, o.name), h("small", { title: o.createdAt ? new Date(o.createdAt).toLocaleString() : "" }, ago(o.createdAt))), st),
-    h("div", { class: "chips" }, h("span", { class: "chip" }, money(o.total)), h("span", { class: "chip alt" }, o.phone), o.coupon ? h("span", { class: "chip alt" }, "Coupon " + o.coupon + " (-" + money(o.discount) + ")") : null),
+    h("div", { class: "chips" }, h("span", { class: "chip" }, money(o.total)), h("span", { class: "chip alt" }, o.phone), o.coupon ? h("span", { class: "chip alt" }, "Coupon " + o.coupon + " (-" + money(o.discount) + ")") : null, o.method === "pickup" ? h("span", { class: "chip" }, "Store pickup") : null),
     h("ul", { class: "items-l" }, its.map(i => h("li", {}, `${i.name} x${i.qty} = ${money(i.price * i.qty)}`))),
     o.address ? h("p", { class: "addr" }, "Deliver to: " + o.address) : null, o.note ? h("p", { class: "addr" }, "Note: " + o.note) : null,
     h("div", { class: "row" },
@@ -158,17 +165,36 @@ function renderRev() {
   $("#pubList").replaceChildren(...(a.length ? a.map(r => revCard(r, false)) : [h("p", { class: "empty" }, "No published reviews yet.")]));
 }
 
-/* Settings */
+/* Settings: details, colour theme, store location */
+const THEMES = [["sunset", "Sunset", "#FF7A18,#FF3D71,#9B5CFF"], ["neon", "Neon", "#9B5CFF,#3355FF,#00C8FF"], ["emerald", "Emerald", "#00D68F,#00B4D8,#3355FF"], ["gold", "Gold", "#F5C542,#F08A24,#E0562C"], ["ocean", "Ocean", "#00C6FF,#0072FF,#7B2FF7"]];
+let theme = "sunset", pin = { lat: 0, lng: 0 };
+function renderThemes() {
+  $("#themes").replaceChildren(...THEMES.map(([k, l, c]) => h("button", { type: "button", class: "th" + (theme === k ? " on" : ""), "aria-pressed": String(theme === k), onclick: () => { theme = k; renderThemes(); } }, h("span", { class: "sw3", style: "background:linear-gradient(135deg," + c + ")" }), l)));
+}
+function renderPin() {
+  $("#locNote").textContent = pin.lat && pin.lng ? "Map pin set at " + pin.lat.toFixed(5) + ", " + pin.lng.toFixed(5) + ". Customers can also see how far they are. Press Save all settings." : "No pin yet: the map will search your address. For an exact spot, stand at your shop and press the button above.";
+  $("#clrLoc").hidden = !(pin.lat && pin.lng);
+}
+$("#useLoc").onclick = () => {
+  if (!navigator.geolocation) return toast("This browser cannot share your location.");
+  toast("Finding your location...");
+  navigator.geolocation.getCurrentPosition(p => { pin = { lat: p.coords.latitude, lng: p.coords.longitude }; renderPin(); toast("Location captured. Press Save all settings."); }, () => toast("Location permission was not given."), { enableHighAccuracy: true, timeout: 10000 });
+};
+$("#clrLoc").onclick = () => { pin = { lat: 0, lng: 0 }; renderPin(); };
 async function loadSettings() {
   try {
     const s = await withTimeout(ref("settings").once("value")), v = { ...DEFAULTS.settings, ...(s.val() || {}) };
     if (/x/i.test(v.whatsapp || "x")) v.whatsapp = DEFAULTS.settings.whatsapp;
     $("#sName").value = v.name; $("#sWa").value = v.whatsapp; $("#sMail").value = v.email; $("#sAnn").value = v.announce || ""; $("#sFee").value = v.deliveryFee ?? 0; $("#sFree").value = v.freeAbove ?? 0;
+    $("#sAddr").value = v.addr || ""; $("#sPhone").value = v.phone || ""; $("#sMap").value = v.mapLink || ""; $("#sOpen").value = v.openAt || ""; $("#sClose").value = v.closeAt || ""; $("#sHours").value = v.hours || ""; $("#sPickup").checked = !!v.pickup;
+    theme = v.theme || "sunset"; pin = { lat: +v.lat || 0, lng: +v.lng || 0 }; renderThemes(); renderPin();
   } catch (e) { toast(errText(e)); }
 }
 $("#saveSet").onclick = guard(async () => {
   let wa = $("#sWa").value.replace(/\D/g, ""); if (wa.length === 10) wa = "91" + wa;
-  await ref("settings").update({ name: $("#sName").value.trim(), whatsapp: wa, email: $("#sMail").value.trim(), announce: $("#sAnn").value.trim(), deliveryFee: parseFloat($("#sFee").value) || 0, freeAbove: parseFloat($("#sFree").value) || 0 });
+  const map = $("#sMap").value.trim(); if (map && !/^https?:\/\//.test(map)) return toast("The Google Maps link must start with https://");
+  await ref("settings").update({ name: $("#sName").value.trim(), whatsapp: wa, email: $("#sMail").value.trim(), announce: $("#sAnn").value.trim(), deliveryFee: parseFloat($("#sFee").value) || 0, freeAbove: parseFloat($("#sFree").value) || 0,
+    theme, addr: $("#sAddr").value.trim(), phone: $("#sPhone").value.trim(), mapLink: map, hours: $("#sHours").value.trim(), openAt: $("#sOpen").value, closeAt: $("#sClose").value, lat: pin.lat, lng: pin.lng, pickup: $("#sPickup").checked });
   $("#sWa").value = wa; toast("Settings saved. Your store is updated.");
 });
 
@@ -193,7 +219,7 @@ function invoice(o) {
   d.title = "Invoice " + o.id.slice(-6).toUpperCase();
   d.head.append(h("style", {}, "body{font:15px system-ui,sans-serif;margin:32px;max-width:720px;color:#111}h1{margin:0 0 4px}table{width:100%;border-collapse:collapse;margin:18px 0}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}.r{text-align:right}.t td{font-weight:700;border:0}p{margin:4px 0}"));
   d.body.append(h("h1", {}, CFG_NAME()), h("p", {}, "Invoice " + o.id.slice(-6).toUpperCase() + " | " + (o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "")),
-    h("p", {}, "Bill to: " + o.name + ", " + o.phone), h("p", {}, "Deliver to: " + (o.address || "")),
+    h("p", {}, "Bill to: " + o.name + ", " + o.phone), h("p", {}, o.method === "pickup" ? "Store pickup" : "Deliver to: " + (o.address || "")),
     h("table", {}, h("tr", {}, h("th", {}, "Item"), h("th", { class: "r" }, "Qty"), h("th", { class: "r" }, "Price"), h("th", { class: "r" }, "Amount")),
       its.map(i => h("tr", {}, cell(i.name), cell(String(i.qty), 1), cell(money(i.price), 1), cell(money(i.price * i.qty), 1))),
       o.discount ? h("tr", { class: "t" }, cell("Discount" + (o.coupon ? " (" + o.coupon + ")" : "")), cell(""), cell("", 1), cell("-" + money(o.discount), 1)) : null,

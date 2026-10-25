@@ -1,6 +1,6 @@
 /* Shared code: starter content, Firebase (Realtime Database) start-up, helpers. Shop data lives under "shop/". */
 const DEFAULTS = {
-  settings: { name: "INSANE Store", whatsapp: "919034830336", email: ADMIN_EMAIL, announce: "Free delivery on orders above ₹999", deliveryFee: 49, freeAbove: 999 },
+  settings: { name: "INSANE Store", whatsapp: "919034830336", email: ADMIN_EMAIL, announce: "Free delivery on orders above ₹999", deliveryFee: 49, freeAbove: 999, theme: "sunset", pickup: false },
   coupon: { code: "WELCOME10", type: "percent", value: 10, min: 500, active: true },
   products: [
     { name: "Classic Hoodie", category: "Fashion", price: 1499, oldPrice: 1999, inStock: true, badge: "Bestseller", stock: 12, desc: "Soft, warm and made to last.\nAvailable in all sizes." },

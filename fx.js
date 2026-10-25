@@ -54,7 +54,7 @@
     const src = card ? card.querySelector(".pimg img, .pimg .ph") : $("#gal .main"), cart = $("#openCart");
     if (RM || !src || !cart || !src.getBoundingClientRect().width) return bump();
     const a = src.getBoundingClientRect(), b = cart.getBoundingClientRect(), el = src.cloneNode(true);
-    el.style.cssText = `position:fixed;left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;margin:0;z-index:95;pointer-events:none;object-fit:cover;border-radius:14px;box-shadow:0 10px 40px rgba(0,200,255,.5)`;
+    el.style.cssText = `position:fixed;left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;margin:0;z-index:95;pointer-events:none;object-fit:cover;border-radius:14px;box-shadow:0 10px 40px rgb(var(--glow2) / .5)`;
     document.body.append(el);
     const dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
     el.animate([{ transform: "translate(0,0) scale(1)", opacity: 1 }, { transform: `translate(${dx * .45}px,${dy * .45 - 90}px) scale(.45)`, opacity: .95, offset: .45 }, { transform: `translate(${dx}px,${dy}px) scale(.05)`, opacity: .3 }],
